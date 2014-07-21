@@ -21,7 +21,7 @@ $settings = @{
     "EndDelimiter"     = "]"
     "SplitDelimiter"   = "|"
     "DelimiterColor"   = [ConsoleColor]::Gray
-    "BehindAheadColor" = [ConsoleColor]::White
+    "DivergentColor"   = [ConsoleColor]::White
     "OperationColor"   = [ConsoleColor]::White
     "CleanColor"       = [ConsoleColor]::Green
     "UncommittedColor" = [ConsoleColor]::Red
@@ -36,17 +36,17 @@ function __fast_git_prompt
     if( is_git_repo )
     {
         # Find the interesting information.
-        $branch_name   = find_git_branch
-        $branch_color  = find_repo_state_color
-        $git_operation = find_git_operation
-        $behind_ahead  = find_behind_ahead( $branch_name )
+        $branch_name          = find_git_branch
+        $branch_color         = find_repo_state_color
+        $git_operation        = find_git_operation
+        $divergence_indicator = find_divergence( $branch_name )
 
         # Build the prompt.
         Write-Host $settings["StartDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
         if( $global:is_diverged )
         {
-            Write-Host $behind_ahead               -ForegroundColor $settings["BehindAheadColor"] -NoNewLine
-            Write-Host $settings["SplitDelimiter"] -ForegroundColor $settings["DelimiterColor"]   -NoNewLine
+            Write-Host $divergence_indicator       -ForegroundColor $settings["DivergentColor"] -NoNewLine
+            Write-Host $settings["SplitDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
         }
         Write-Host $branch_name -ForegroundColor $branch_color -NoNewLine
         if( $global:is_in_operation )
@@ -88,18 +88,35 @@ function is_git_repo
 }
 
 #------------------------------------------------------------------------------
+function is_new_git_repo
+{
+  # The .git/refs/ folder contains all commits that have names, such as tags 
+  #   and branches. A new repository won't have any commits, so the heads
+  #   folder will be empty.
+  return (!(Test-Path $global:git_path/refs/heads/*))
+}
+
+#------------------------------------------------------------------------------
 function find_git_branch
 {
     # Find the full branch name.
     $global:full_branch = $(git symbolic-ref -q HEAD) 
     
-    if( $global:full_branch -ne $null )
+    if( is_new_git_repo )
+    {
+        $short_branch = "Fresh Repo"
+    }
+    elseif( $global:full_branch -ne $null )
     {
         # Extract the short branch name.
-        return $( $global:full_branch -replace 'refs/heads/', '' )
+        $short_branch = $( $global:full_branch -replace 'refs/heads/', '' )
+    }
+    else
+    {
+        $short_branch = "No Branch"
     }
 
-    return "No Branch" 
+    return $short_branch
 }
 
 #------------------------------------------------------------------------------
@@ -164,18 +181,20 @@ function find_git_operation
 
     # Set flag for prompt.
     $global:is_in_operation = $FALSE
+
+    return "NO OPERATION"
 }
 
 #------------------------------------------------------------------------------
-function find_behind_ahead
+function find_divergence
 {
-    if( $global:full_branch -ne $null )
+    if( ( $global:full_branch -ne $null ) -and !(is_new_git_repo))
     {
         # Find upstream branch
         $tracking_branch = $(git for-each-ref --format='%(upstream:short)' $global:full_branch)
 
         # Find the upstream divergence.
-        # Note: --count only compatible with recent git versions
+        # Note: --count only compatible with recent git versions.
         $divergence = $(git rev-list --left-right --count "$tracking_branch...HEAD")
 
         # Parse output.
@@ -204,5 +223,7 @@ function find_behind_ahead
 
 # Make the following function available for use outside this file.
 #Export-ModuleMember __fast_git_prompt
+
+# Use the following command while debugging to export all functions defined in this file.
 Export-ModuleMember -Function *
 
