@@ -8,9 +8,9 @@ FastGitPrompt provides critical information about the state of a Git repository 
 
 ## Installation ##
 
-1. Place this module in $PROFILE\Modules\FastGitPrompt.
+1. Place this module in the directory $PROFILE\Modules\FastGitPrompt.
 
-2. Place the command "Import-Module FastGitPrompt" in profile.
+2. Place the command "Import-Module FastGitPrompt" in your Powershell profile.
 
 3. Place the function call "__fast_git_prompt" in your prompt{} function in your profile where you want the status to be displayed.
 
