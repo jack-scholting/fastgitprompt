@@ -1,6 +1,6 @@
 #==============================================================================
 # Author: Jack Scholting
-# Date: 2013-01-20 Sun 11:21 AM
+# Date: 2013-01-20
 # Purpose: Display important git information in the powershell prompt. It must
 #  perform quickly even in repos with hundreds of submodules. Therefore all 
 #  git commands should be "plumbing" commands, not "porcelain" commands.
@@ -36,20 +36,20 @@ function __fast_git_prompt
     if( is_git_repo )
     {
         # Find the interesting information.
-        $branch_name          = find_git_branch
-        $branch_color         = find_repo_state_color
-        $git_operation        = find_git_operation
-        $divergence_indicator = find_divergence( $branch_name )
+        $short_branch, $full_branch      = find_git_branch
+        $branch_color                    = find_repo_state_color
+        $operation_msg, $is_in_operation = find_git_operation
+        $divergence_msg, $is_diverged    = find_divergence $branch_name 
 
         # Build the prompt.
         Write-Host $settings["StartDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
-        if( $global:is_diverged )
+        if( $is_diverged )
         {
-            Write-Host $divergence_indicator       -ForegroundColor $settings["DivergentColor"] -NoNewLine
+            Write-Host $divergence_msg             -ForegroundColor $settings["DivergentColor"] -NoNewLine
             Write-Host $settings["SplitDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
         }
-        Write-Host $branch_name -ForegroundColor $branch_color -NoNewLine
-        if( $global:is_in_operation )
+        Write-Host $short_branch -ForegroundColor $branch_color -NoNewLine
+        if( $is_in_operation )
         {
             Write-Host $settings["SplitDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
             Write-Host $git_operation              -ForegroundColor $settings["OperationColor"] -NoNewLine
@@ -93,30 +93,30 @@ function is_new_git_repo
   # The .git/refs/ folder contains all commits that have names, such as tags 
   #   and branches. A new repository won't have any commits, so the heads
   #   folder will be empty.
-  return (!(Test-Path $global:git_path/refs/heads/*))
+  return ( !( Test-Path $global:git_path/refs/heads/* ) )
 }
 
 #------------------------------------------------------------------------------
 function find_git_branch
 {
     # Find the full branch name.
-    $global:full_branch = $(git symbolic-ref -q HEAD) 
+    $full_branch = $(git symbolic-ref -q HEAD) 
     
     if( is_new_git_repo )
     {
         $short_branch = "Fresh Repo"
     }
-    elseif( $global:full_branch -ne $null )
+    elseif( $full_branch -ne $null )
     {
         # Extract the short branch name.
-        $short_branch = $( $global:full_branch -replace 'refs/heads/', '' )
+        $short_branch = $( $full_branch -replace 'refs/heads/', '' )
     }
     else
     {
         $short_branch = "No Branch"
     }
 
-    return $short_branch
+    return $short_branch, $full_branch
 }
 
 #------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ function find_repo_state_color
     	return $settings["UncommittedColor"]
     }
 
-    # Check for staged(but uncommitted) changes.
+    # Check for staged (but uncommitted) changes.
     git diff --cached --quiet
     if( $? -eq $FALSE ) 
     { 
@@ -137,7 +137,7 @@ function find_repo_state_color
     }
 
     # Check for untracked files.
-    $untracked = $(git ls-files --other --exclude-standard --directory )
+    $untracked = $( git ls-files --other --exclude-standard --directory )
     if( $untracked -ne $null ) 
     { 
     	return $settings["UntrackedColor"]
@@ -150,75 +150,66 @@ function find_repo_state_color
 #------------------------------------------------------------------------------
 function find_git_operation
 {
-    # Merge
     if( Test-Path "$global:git_path/MERGE_HEAD" ) 
     {
-    	$global:is_in_operation = $TRUE
-    	return "MERGING"
+    	$operation_msg = "MERGING"
+    }
+    elseif( ( Test-Path "$global:git_path/rebase-merge" ) -OR 
+            ( Test-Path "$global:git_path/rebase-apply" ) )
+    {
+    	$operation_msg = "REBASING"
+    }
+    elseif( Test-Path "$global:git_path/CHERRY_PICK_HEAD" ) 
+    {
+    	$operation_msg = "CHERRY-PICKING"
+    }
+    elseif( Test-Path "$global:git_path/BISECT_LOG" ) 
+    {
+    	$operation_msg = "BISECTING"
+    }
+    else
+    {
+        $operation_msg = "NO OPERATION"
     }
 
-    # Rebase
-    if( (Test-Path "$global:git_path/rebase-merge") -OR 
-    	(Test-Path "$global:git_path/rebase-apply") )
-    {
-    	$global:is_in_operation = $TRUE
-    	return "REBASING"
-    }
-   
-    # Cherry pick
-    if( Test-Path "$global:git_path/CHERRY_PICK_HEAD" ) 
-    {
-    	$global:is_in_operation = $TRUE
-    	return "CHERRY-PICKING"
-    }
-    
-    # Bisect
-    if( Test-Path "$global:git_path/BISECT_LOG" ) 
-    {
-    	$global:is_in_operation = $TRUE
-    	return "BISECTING"
-    }
-
-    # Set flag for prompt.
-    $global:is_in_operation = $FALSE
-
-    return "NO OPERATION"
+    return( $operation_msg, ( $operation_msg -ne "NO OPERATION" ) )
 }
 
 #------------------------------------------------------------------------------
-function find_divergence
+function find_divergence( $full_branch )
 {
-    if( ( $global:full_branch -ne $null ) -and !(is_new_git_repo))
+    # Initialize the return value.
+    $divergence_msg = $null
+
+    # It is not possible to diverge from a branch, if we aren't on a branch, or 
+    # this is a new repository. 
+    if( ( $full_branch -ne $null ) -and !( is_new_git_repo ) )
     {
         # Find upstream branch
-        $tracking_branch = $(git for-each-ref --format='%(upstream:short)' $global:full_branch)
+        $tracking_branch = $( git for-each-ref --format='%(upstream:short)' $full_branch )
 
         # Find the upstream divergence.
         # Note: --count only compatible with recent git versions.
-        $divergence = $(git rev-list --left-right --count "$tracking_branch...HEAD")
+        $divergence = $( git rev-list --left-right --count "$tracking_branch...HEAD" )
 
         # Parse output.
-        $div_split = $divergence.Split("`t")
+        $div_split = $divergence.Split( "`t" )
         $behind = $div_split[0] 
         $ahead  = $div_split[1]
 
-        if( ($behind -ne 0) -OR
-    	    ($ahead  -ne 0) )
+        if( ( $behind -ne 0 ) -OR
+    	    ( $ahead  -ne 0 ) )
         {
             # Add indicators.
             $behind = $behind + "<<"
             $ahead  = $ahead  + ">>"
 
-            # Set flag for prompt.
-            $global:is_diverged = $TRUE
-            
             # Return output.
-            return "$behind $ahead"
+            $divergence_msg = "$behind $ahead"
         }
     }
 
-    # Set flag for prompt.
-    $global:is_diverged = $FALSE
+    return( $divergence_msg, ( $divergence_msg -ne $null ) )
 }
 
 # Make the following function available for use outside this file.
