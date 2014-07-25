@@ -38,8 +38,8 @@ function __fast_git_prompt
         # Find the interesting information.
         $short_branch, $full_branch      = find_git_branch
         $branch_color                    = find_repo_state_color
-        $operation_msg, $is_in_operation = find_git_operation
-        $divergence_msg, $is_diverged    = find_divergence $branch_name 
+        $is_in_operation, $operation_msg = find_git_operation
+        $is_diverged, $divergence_msg    = find_divergence $full_branch 
 
         # Build the prompt.
         Write-Host $settings["StartDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
@@ -172,7 +172,7 @@ function find_git_operation
         $operation_msg = "NO OPERATION"
     }
 
-    return( $operation_msg, ( $operation_msg -ne "NO OPERATION" ) )
+    return( ( $operation_msg -ne "NO OPERATION" ), $operation_msg )
 }
 
 #------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ function find_divergence( $full_branch )
         }
     }
 
-    return( $divergence_msg, ( $divergence_msg -ne $null ) )
+    return( ( $divergence_msg -ne $null ), $divergence_msg )
 }
 
 # Make the following function available for use outside this file.
