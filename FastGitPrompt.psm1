@@ -2,12 +2,12 @@
 # Author: Jack Scholting
 # Creation Date: 01/20/2013
 # Purpose: Display important git information in the powershell prompt. It must
-#  perform quickly even in repos with hundreds of submodules. Therefore all 
+#  perform quickly even in repos with hundreds of submodules. Therefore all
 #  git commands should be "plumbing" commands, not "porcelain" commands.
 # Usage:
 #  Place this module in $PROFILE/Modules/FastGitPrompt.
-#  Place the command "Import-Module FastGitPrompt" in profile. 
-#  Place the function call "__fast_git_prompt" in your prompt{} function in 
+#  Place the command "Import-Module FastGitPrompt" in profile.
+#  Place the function call "__fast_git_prompt" in your prompt{} function in
 #    your profile where you want the status to be displayed.
 #==============================================================================
 
@@ -48,45 +48,51 @@ function __fast_git_prompt
         if( $is_in_operation )
         {
             Write-Host $settings["SplitDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
-            Write-Host $git_operation              -ForegroundColor $settings["OperationColor"] -NoNewLine
+            Write-Host $operation_msg              -ForegroundColor $settings["OperationColor"] -NoNewLine
         }
-        Write-Host $settings["EndDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine  
+        Write-Host $settings["EndDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
     }
 }
 
 #------------------------------------------------------------------------------
 function is_git_repo
 {
+    # Initialize the global and return value.
+    $global:git_path = $null
+
     # Test current directory.
-    if( Test-Path ".git" ) 
+    if( Test-Path ".git" )
     {
         $global:git_path = ".git"
-        return $TRUE
     }
-     
-    # Test parent directories.
-    $checkIn = (Get-Item .).parent
-    while( $checkIn -ne $NULL ) 
+    else
     {
-        $pathToTest = $checkIn.fullname + '/.git'
-        if( Test-Path $pathToTest ) 
+        # Get the initial parent directory.
+        $parent_path = (Get-Item .).parent
+
+        # Keep moving upward.
+        while( $parent_path -ne $nulL )
         {
-            $global:git_path = $pathToTest
-            return $TRUE
-        } 
-        else 
-        {
-            $checkIn = $checkIn.parent
+            $potential_git_path = $parent_path.fullname + '/.git'
+            if( Test-Path $potential_git_path )
+            {
+                $global:git_path = $potential_git_path
+                break
+            }
+            else
+            {
+                $parent_path = $parent_path.parent
+            }
         }
     }
-     
-    return $FALSE
+
+    return( $global:git_path -ne $null )
 }
 
 #------------------------------------------------------------------------------
 function is_new_git_repo
 {
-  # The .git/refs/ folder contains all commits that have names, such as tags 
+  # The .git/refs/ folder contains all commits that have names, such as tags
   #   and branches. A new repository won't have any commits, so the heads
   #   folder will be empty.
   return ( !( Test-Path $global:git_path/refs/heads/* ) )
@@ -96,8 +102,8 @@ function is_new_git_repo
 function find_git_branch
 {
     # Find the full branch name.
-    $full_branch = $(git symbolic-ref -q HEAD) 
-    
+    $full_branch = $(git symbolic-ref -q HEAD)
+
     if( is_new_git_repo )
     {
         $short_branch = "Fresh Repo"
@@ -120,23 +126,23 @@ function find_repo_state_color
 {
     # Check for regular uncommitted changes.
     git diff-files --quiet
-    if( $? -eq $FALSE ) 
-    { 
-    	return $settings["UncommittedColor"]
+    if( $? -eq $FALSE )
+    {
+        return $settings["UncommittedColor"]
     }
 
     # Check for staged (but uncommitted) changes.
     git diff --cached --quiet
-    if( $? -eq $FALSE ) 
-    { 
+    if( $? -eq $FALSE )
+    {
         return $settings["StagedColor"]
     }
 
     # Check for untracked files.
     $untracked = $( git ls-files --other --exclude-standard --directory )
-    if( $untracked -ne $null ) 
-    { 
-    	return $settings["UntrackedColor"]
+    if( $untracked -ne $null )
+    {
+        return $settings["UntrackedColor"]
     }
 
     # Repo is clean.
@@ -146,29 +152,28 @@ function find_repo_state_color
 #------------------------------------------------------------------------------
 function find_git_operation
 {
-    if( Test-Path "$global:git_path/MERGE_HEAD" ) 
+    # Initialize the return value.
+    $operation_msg = $null
+
+    if( Test-Path "$global:git_path/MERGE_HEAD" )
     {
-    	$operation_msg = "MERGING"
+        $operation_msg = "MERGING"
     }
-    elseif( ( Test-Path "$global:git_path/rebase-merge" ) -OR 
+    elseif( ( Test-Path "$global:git_path/rebase-merge" ) -OR
             ( Test-Path "$global:git_path/rebase-apply" ) )
     {
-    	$operation_msg = "REBASING"
+        $operation_msg = "REBASING"
     }
-    elseif( Test-Path "$global:git_path/CHERRY_PICK_HEAD" ) 
+    elseif( Test-Path "$global:git_path/CHERRY_PICK_HEAD" )
     {
-    	$operation_msg = "CHERRY-PICKING"
+        $operation_msg = "CHERRY-PICKING"
     }
-    elseif( Test-Path "$global:git_path/BISECT_LOG" ) 
+    elseif( Test-Path "$global:git_path/BISECT_LOG" )
     {
-    	$operation_msg = "BISECTING"
-    }
-    else
-    {
-        $operation_msg = "NO OPERATION"
+        $operation_msg = "BISECTING"
     }
 
-    return( ( $operation_msg -ne "NO OPERATION" ), $operation_msg )
+    return( ( $operation_msg -ne $null ), $operation_msg )
 }
 
 #------------------------------------------------------------------------------
@@ -177,8 +182,8 @@ function find_divergence( $full_branch )
     # Initialize the return value.
     $divergence_msg = $null
 
-    # It is not possible to diverge from a branch, if we aren't on a branch, or 
-    # this is a new repository. 
+    # It is not possible to diverge from a branch, if we aren't on a branch, or
+    # this is a new repository.
     if( ( $full_branch -ne $null ) -and !( is_new_git_repo ) )
     {
         # Find upstream branch
@@ -190,11 +195,11 @@ function find_divergence( $full_branch )
 
         # Parse output.
         $div_split = $divergence.Split( "`t" )
-        $behind = $div_split[0] 
+        $behind = $div_split[0]
         $ahead  = $div_split[1]
 
         if( ( $behind -ne 0 ) -OR
-    	    ( $ahead  -ne 0 ) )
+            ( $ahead  -ne 0 ) )
         {
             # Add indicators.
             $behind = $behind + "<<"
