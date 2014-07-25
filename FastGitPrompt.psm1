@@ -95,7 +95,7 @@ function is_new_git_repo
   # The .git\refs\ folder contains all commits that have names, such as tags
   #   and branches. A new repository won't have any commits, so the heads
   #   folder will be empty.
-  return ( !( Test-Path "$global:git_path\refs\heads\*" ) )
+  return( !( Test-Path "$global:git_path\refs\heads\*" ) )
 }
 
 #------------------------------------------------------------------------------
@@ -118,35 +118,32 @@ function find_git_branch
         $short_branch = "No Branch"
     }
 
-    return $short_branch, $full_branch
+    return( $short_branch, $full_branch )
 }
 
 #------------------------------------------------------------------------------
 function find_repo_state_color
 {
-    # Check for regular uncommitted changes.
-    git diff-files --quiet
-    if( $? -eq $FALSE )
+    # Initialize the return value.
+    $state_color = $settings["CleanColor"]
+
+    if( $( git diff-files ) -ne $null )
     {
-        return $settings["UncommittedColor"]
+        # Check for regular uncommitted changes.
+        $state_color = $settings["UncommittedColor"]
+    }
+    elseif( $( git diff --cached ) -ne $null )
+    {
+        # Check for staged (but uncommitted) changes.
+        $state_color = $settings["StagedColor"]
+    }
+    elseif( $( git ls-files --other --exclude-standard --directory ) -ne $null )
+    {
+        # Check for untracked files.
+        $state_color = $settings["UntrackedColor"]
     }
 
-    # Check for staged (but uncommitted) changes.
-    git diff --cached --quiet
-    if( $? -eq $FALSE )
-    {
-        return $settings["StagedColor"]
-    }
-
-    # Check for untracked files.
-    $untracked = $( git ls-files --other --exclude-standard --directory )
-    if( $untracked -ne $null )
-    {
-        return $settings["UntrackedColor"]
-    }
-
-    # Repo is clean.
-    return $settings["CleanColor"]
+    return $state_color
 }
 
 #------------------------------------------------------------------------------
