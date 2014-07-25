@@ -5,7 +5,7 @@
 #  perform quickly even in repos with hundreds of submodules. Therefore all
 #  git commands should be "plumbing" commands, not "porcelain" commands.
 # Usage:
-#  Place this module in $PROFILE/Modules/FastGitPrompt.
+#  Place this module in $PROFILE\Modules\FastGitPrompt.
 #  Place the command "Import-Module FastGitPrompt" in profile.
 #  Place the function call "__fast_git_prompt" in your prompt{} function in
 #    your profile where you want the status to be displayed.
@@ -73,7 +73,7 @@ function is_git_repo
         # Keep moving upward.
         while( $parent_path -ne $nulL )
         {
-            $potential_git_path = $parent_path.fullname + '/.git'
+            $potential_git_path = $parent_path.fullname + '\.git'
             if( Test-Path $potential_git_path )
             {
                 $global:git_path = $potential_git_path
@@ -92,10 +92,10 @@ function is_git_repo
 #------------------------------------------------------------------------------
 function is_new_git_repo
 {
-  # The .git/refs/ folder contains all commits that have names, such as tags
+  # The .git\refs\ folder contains all commits that have names, such as tags
   #   and branches. A new repository won't have any commits, so the heads
   #   folder will be empty.
-  return ( !( Test-Path $global:git_path/refs/heads/* ) )
+  return ( !( Test-Path "$global:git_path\refs\heads\*" ) )
 }
 
 #------------------------------------------------------------------------------
@@ -155,20 +155,20 @@ function find_git_operation
     # Initialize the return value.
     $operation_msg = $null
 
-    if( Test-Path "$global:git_path/MERGE_HEAD" )
+    if( Test-Path "$global:git_path\MERGE_HEAD" )
     {
         $operation_msg = "MERGING"
     }
-    elseif( ( Test-Path "$global:git_path/rebase-merge" ) -OR
-            ( Test-Path "$global:git_path/rebase-apply" ) )
+    elseif( ( Test-Path "$global:git_path\rebase-merge" ) -OR
+            ( Test-Path "$global:git_path\rebase-apply" ) )
     {
         $operation_msg = "REBASING"
     }
-    elseif( Test-Path "$global:git_path/CHERRY_PICK_HEAD" )
+    elseif( Test-Path "$global:git_path\CHERRY_PICK_HEAD" )
     {
         $operation_msg = "CHERRY-PICKING"
     }
-    elseif( Test-Path "$global:git_path/BISECT_LOG" )
+    elseif( Test-Path "$global:git_path\BISECT_LOG" )
     {
         $operation_msg = "BISECTING"
     }
