@@ -1,4 +1,6 @@
 # FastGitPrompt #
+![During a Bisect](https://bitbucket.org/repo/eyEaKG/images/3527264792-bisecting.PNG)
+
 
 ## Overview ##
 
