@@ -16,7 +16,7 @@ FastGitPrompt provides critical information about the state of a Git repository 
 
 ## Usage ##
 
-Use Git through Powershell as normal and enjoy the extra information without constantly typing 'git status'. 
+Use Git through Powershell as normal and enjoy the extra information.
 
 ## Credits ##
 
