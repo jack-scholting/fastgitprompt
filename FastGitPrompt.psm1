@@ -1,18 +1,14 @@
 #==============================================================================
 # Author: Jack Scholting
-# Date: 2013-01-20
+# Creation Date: 01/20/2013
 # Purpose: Display important git information in the powershell prompt. It must
 #  perform quickly even in repos with hundreds of submodules. Therefore all 
 #  git commands should be "plumbing" commands, not "porcelain" commands.
-# Current Runtime: 
-#  Small repo - 124 milliseconds
-#  Medium repo - 200 milliseconds
-# Credits: I used git-completion.bash and Posh-Git to find the answers to many
-#  of my questions.
 # Usage:
 #  Place this module in $PROFILE/Modules/FastGitPrompt.
-#  Place "Import-Module FastGitPrompt" in profile. 
-#  Place "__fast_git_prompt" in your prompt{} function in your profile.
+#  Place the command "Import-Module FastGitPrompt" in profile. 
+#  Place the function call "__fast_git_prompt" in your prompt{} function in 
+#    your profile where you want the status to be displayed.
 #==============================================================================
 
 # Settings for the prompt. Feel free to customize.
@@ -39,7 +35,7 @@ function __fast_git_prompt
         $short_branch, $full_branch      = find_git_branch
         $branch_color                    = find_repo_state_color
         $is_in_operation, $operation_msg = find_git_operation
-        $is_diverged, $divergence_msg    = find_divergence $full_branch 
+        $is_diverged, $divergence_msg    = find_divergence $full_branch
 
         # Build the prompt.
         Write-Host $settings["StartDelimiter"] -ForegroundColor $settings["DelimiterColor"] -NoNewLine
