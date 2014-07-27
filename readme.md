@@ -1,11 +1,22 @@
 # FastGitPrompt #
 
-![Normal Clean Repo](/../screenshots/screenshots/normal.PNG?raw=true)
-![Uncommited changes](/../screenshots/screenshots/uncommited.PNG?raw=true)
-![Changes staged but not committed](/../screenshots/screenshots/indexed.PNG?raw=true)
-![Ahead by 1 commit](/../screenshots/screenshots/ahead.PNG?raw=true)
-![Ahead by 3 commits with untracked changes](/../screenshots/screenshots/ahead3.PNG?raw=true)
-![During a Bisect with uncommited changes](/../screenshots/screenshots/bisecting.PNG?raw=true)
+Normal Clean Repo
+![normal](/../screenshots/screenshots/normal.PNG?raw=true)
+
+Uncommited changes
+![uncommited](/../screenshots/screenshots/uncommited.PNG?raw=true)
+
+Changes staged but not committed
+![indexed](/../screenshots/screenshots/indexed.PNG?raw=true)
+
+Ahead by 1 commit
+![ahead](/../screenshots/screenshots/ahead.PNG?raw=true)
+
+Ahead by 3 commits with untracked changes
+![ahead3](/../screenshots/screenshots/ahead3.PNG?raw=true)
+
+During a Bisect with uncommited changes
+![bisecting](/../screenshots/screenshots/bisecting.PNG?raw=true)
 
 ## Overview ##
 
