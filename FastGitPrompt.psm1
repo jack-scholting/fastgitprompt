@@ -211,8 +211,8 @@ function find_divergence( $full_branch )
 }
 
 # Make the following function available for use outside this file.
-#Export-ModuleMember __fast_git_prompt
+# Note: Use the following command while debugging to export all functions defined in this file.
+#   "Export-ModuleMember -Function *"
+Export-ModuleMember __fast_git_prompt
 
-# Use the following command while debugging to export all functions defined in this file.
-Export-ModuleMember -Function *
 
