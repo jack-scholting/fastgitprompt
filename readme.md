@@ -1,11 +1,11 @@
 # FastGitPrompt #
 
-![Normal Clean Repo](/../screenshots/screenshots/normal.PNG?raw=true "Optional Title")
-![Uncommited changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
-![Changes staged but not committed](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
-![Ahead by 1 commit](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/ahead.PNG)
-![Ahead by 3 commits with untracked changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/ahead3.PNG)
-![During a Bisect with uncommited changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/bisecting.PNG)
+![Normal Clean Repo](/../screenshots/screenshots/normal.PNG?raw=true)
+![Uncommited changes](/../screenshots/screenshots/uncommited.PNG?raw=true)
+![Changes staged but not committed](/../screenshots/screenshots/indexed.PNG?raw=true)
+![Ahead by 1 commit](/../screenshots/screenshots/ahead.PNG?raw=true)
+![Ahead by 3 commits with untracked changes](/../screenshots/screenshots/ahead3.PNG?raw=true)
+![During a Bisect with uncommited changes](/../screenshots/screenshots/bisecting.PNG?raw=true)
 
 ## Overview ##
 
