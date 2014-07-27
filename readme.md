@@ -1,10 +1,15 @@
 # FastGitPrompt #
 
-![During a Bisect](https://bitbucket.org/repo/eyEaKG/images/3527264792-bisecting.PNG)
+![Normal Clean Repo](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/normal.PNG)
+![Uncommited changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
+![Changes staged but not committed](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
+![Ahead by 1 commit](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/ahead.PNG)
+![Ahead by 3 commits with untracked changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/ahead3.PNG)
+![During a Bisect with uncommited changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/bisecting.PNG)
 
 ## Overview ##
 
-FastGitPrompt provides critical information about the state of a Git repository while using the Powershell command line. It was created because the existing solutions didn't meet my needs. I was working with very large Git repos with many submodules, other status scripts would take minutes to return a status. FastGitPrompt is very configurable, just change the 'settings' variable at the top of the function to change how the status looks. 
+FastGitPrompt provides critical information about the state of a Git repository while using the Powershell command line. It was created because the existing solutions didn't meet my needs. I was working with very large Git repos with many submodules, other status scripts would take minutes to return a status. FastGitPrompt is very configurable, just change the 'settings' variable at the top of the function to change how the status looks.
 
 ## Installation ##
 
