@@ -1,6 +1,6 @@
 # FastGitPrompt #
 
-![Normal Clean Repo](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/normal.PNG)
+![Normal Clean Repo](/../screenshots/screenshots/normal.PNG?raw=true "Optional Title")
 ![Uncommited changes](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
 ![Changes staged but not committed](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/indexed.PNG)
 ![Ahead by 1 commit](https://github.com/jack-scholting/fastgitprompt/tree/screenshots/screenshots/ahead.PNG)
